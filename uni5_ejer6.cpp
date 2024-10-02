@@ -59,6 +59,15 @@ void ultimo_par(puntero cz){
         }
     }
 }
+void mostrar_inverso(puntero cabeza) {
+  if (cabeza->sig == NULL){
+    printf("%d ", cabeza->nro);
+    return;
+  }else{
+    mostrar_inverso(cabeza->sig);
+  }
+  printf("%d ", cabeza->nro);
+}
 
 void mostrar(puntero cz){
     if(cz != NULL){
@@ -75,10 +84,10 @@ int main(){
     carga_ordernada(cabeza);
 
     mostrar(cabeza);
+    printf("\n");
+    mostrar_inverso(cabeza);
 
     free(cabeza);
-
-
     getchar();
     getchar();
 }
