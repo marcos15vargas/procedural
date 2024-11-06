@@ -1,0 +1,267 @@
+Ejercicio 5 Unidad 6
+
+- Grupo 4 -
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define N_CICLOS 4
+#define CICLOS_INICIO 2018
+#define MAX_CARRERAS 100
+
+typedef struct {
+    int codigo;
+    char nombre[100];
+    int duracion;
+    int inscriptos[N_CICLOS];
+} Carrera;
+
+// Cargar datos de carreras al archivo
+void cargarDatos() {
+    FILE *archivo = fopen("CarreUni.Dat", "ab"); // Cambiar a "ab" para agregar datos
+    Carrera carrera;
+    int cantidad;
+
+    if (!archivo) {
+        printf("Error al crear el archivo.\n");
+        return;
+    }
+
+    printf("Ingrese la cantidad de carreras a cargar: ");
+    scanf("%d", &cantidad);
+
+    for (int i = 0; i < cantidad; i++) {
+        printf("Carrera %d:\n", i + 1);
+        printf("Codigo: ");
+        scanf("%d", &carrera.codigo);
+        printf("Nombre: ");
+        scanf(" %[^\n]", carrera.nombre);
+        printf("Duracion (en años): ");
+        scanf("%d", &carrera.duracion);
+        printf("Inscriptos en los ciclos 2018, 2019, 2020, 2021 (separados por espacio): ");
+        for (int j = 0; j < N_CICLOS; j++) {
+            scanf("%d", &carrera.inscriptos[j]);
+        }
+
+        fwrite(&carrera, sizeof(Carrera), 1, archivo);
+    }
+
+    fclose(archivo);
+    printf("Datos cargados correctamente.\n");
+}
+
+// Mostrar nombre de carrera y ciclo con mayor cantidad de inscriptos
+void mostrarCarreraMayorInscriptos() {
+    int codigo, i, maxInscriptos = 0, cicloMax = 0;
+    Carrera carrera;
+    FILE *archivo = fopen("CarreUni.Dat", "rb");
+    
+    if (!archivo) {
+        printf("Error al abrir el archivo.\n");
+        return;
+    }
+
+    printf("Ingrese el codigo de carrera: ");
+    scanf("%d", &codigo);
+
+    while (fread(&carrera, sizeof(Carrera), 1, archivo)) {
+        if (carrera.codigo == codigo) {
+            printf("Carrera: %s\n", carrera.nombre);
+            for (i = 0; i < N_CICLOS; i++) {
+                if (carrera.inscriptos[i] > maxInscriptos) {
+                    maxInscriptos = carrera.inscriptos[i];
+                    cicloMax = i;
+                }
+            }
+            printf("Ciclo con mayor inscriptos: %d (%d inscriptos)\n", CICLOS_INICIO + cicloMax, maxInscriptos);
+            fclose(archivo);
+            return;
+        }
+    }
+
+    printf("Carrera no encontrada.\n");
+    fclose(archivo);
+}
+
+// Modificar inscriptos de ciclos 2018 a 2021 para una carrera
+void modificarInscriptos() {
+    int codigo, ciclo, nuevosInscriptos;
+    Carrera carrera;
+    FILE *archivo = fopen("CarreUni.Dat", "r+b");
+
+    if (!archivo) {
+        printf("Error al abrir el archivo.\n");
+        return;
+    }
+
+    printf("Ingrese el codigo de carrera: ");
+    scanf("%d", &codigo);
+
+    int posicion = -1;
+
+    while (fread(&carrera, sizeof(Carrera), 1, archivo)) {
+        if (carrera.codigo == codigo) {
+            posicion = ftell(archivo) - sizeof(Carrera);
+            printf("Carrera encontrada: %s\n", carrera.nombre);
+            printf("Ingrese el ciclo lectivo (2018-2021): ");
+            scanf("%d", &ciclo);
+            if (ciclo < 2018 || ciclo > 2021) {
+                printf("Ciclo invalido.\n");
+                fclose(archivo);
+                return;
+            }
+            printf("Ingrese la nueva cantidad de inscriptos: ");
+            scanf("%d", &nuevosInscriptos);
+
+            carrera.inscriptos[ciclo - 2018] = nuevosInscriptos;
+
+            fseek(archivo, posicion, SEEK_SET);
+            fwrite(&carrera, sizeof(Carrera), 1, archivo);
+            printf("Inscriptos modificados.\n");
+            fclose(archivo);
+            return;
+        }
+    }
+
+    printf("Carrera no encontrada.\n");
+    fclose(archivo);
+}
+
+// Carrera con mayor inscriptos en 2020
+void carreraMayorInscriptos2020() {
+    Carrera carrera;
+    int maxInscriptos = 0;
+    char carreraMax[100];
+    FILE *archivo = fopen("CarreUni.Dat", "rb");
+
+    if (!archivo) {
+        printf("Error al abrir el archivo.\n");
+        return;
+    }
+
+    while (fread(&carrera, sizeof(Carrera), 1, archivo)) {
+        if (carrera.inscriptos[2] > maxInscriptos) {
+            maxInscriptos = carrera.inscriptos[2];
+            strcpy(carreraMax, carrera.nombre);
+        }
+    }
+
+    if (maxInscriptos > 0) {
+        printf("Carrera con mayor inscriptos en 2020: %s (%d inscriptos)\n", carreraMax, maxInscriptos);
+    } else {
+        printf("No se encontraron inscriptos para el ciclo 2020.\n");
+    }
+
+    fclose(archivo);
+}
+
+// Listado de carreras por facultad, ordenado por total de inscriptos
+void listarCarrerasPorFacultad() {
+    Carrera carreras[MAX_CARRERAS];
+    int totalInscriptos[MAX_CARRERAS] = {0};
+    int contador = 0;
+    
+    FILE *archivo = fopen("CarreUni.Dat", "rb");
+    
+    if (!archivo) {
+        printf("Error al abrir el archivo.\n");
+        return;
+    }
+
+    while (fread(&carreras[contador], sizeof(Carrera), 1, archivo)) {
+        totalInscriptos[contador] = 0;
+        for (int i = 0; i < N_CICLOS; i++) {
+            totalInscriptos[contador] += carreras[contador].inscriptos[i];
+        }
+        contador++;
+    }
+
+    fclose(archivo);
+
+    // Ordenar las carreras por total de inscriptos
+    for (int i = 0; i < contador - 1; i++) {
+        for (int j = 0; j < contador - i - 1; j++) {
+            if (totalInscriptos[j] > totalInscriptos[j + 1]) {
+                // Intercambiar total de inscriptos
+                int temp = totalInscriptos[j];
+                totalInscriptos[j] = totalInscriptos[j + 1];
+                totalInscriptos[j + 1] = temp;
+                // Intercambiar carreras
+                Carrera tempCarrera = carreras[j];
+                carreras[j] = carreras[j + 1];
+                carreras[j + 1] = tempCarrera;
+            }
+        }
+    }
+
+    printf("\nListado de carreras por facultad:\n");
+    for (int i = 0; i < contador; i++) {
+        printf("Carrera: %s, Duracion: %d anios, Total inscriptos: %d\n", carreras[i].nombre, carreras[i].duracion, totalInscriptos[i]);
+    }
+}
+
+int main() {
+    int opcion;
+
+    FILE *archivoVerif = fopen("CarreUni.Dat", "rb");
+    if (!archivoVerif) {
+        printf("El archivo no existe. Cargando datos...\n");
+        cargarDatos();
+    } else {
+        fclose(archivoVerif);
+    }
+
+    do {
+        printf("\n Menu: \n");
+        printf("1. Cargar datos de carreras\n");
+        printf("2. Mostrar nombre de carrera y ciclo con mayor inscriptos\n");
+        printf("3. Modificar inscriptos de ciclos 2018 a 2021 para una carrera\n");
+        printf("4. Carrera con mayor inscriptos en 2020\n");
+        printf("5. Listado de carreras por facultad, ordenado por total de inscriptos\n");
+        printf("6. Finalizar\n");
+        printf("Ingrese una opcion: ");
+        scanf("%d", &opcion);
+
+        switch(opcion) {
+            case 1:
+                cargarDatos();
+                break;
+            case 2:
+                mostrarCarreraMayorInscriptos();
+                break;
+            case 3:
+                modificarInscriptos();
+                break;
+            case 4:
+                carreraMayorInscriptos2020();
+                break;
+            case 5:
+                listarCarrerasPorFacultad();
+                break;
+            case 6:
+                printf("Saliendo del programa...\n");
+                break;
+            default:
+                printf("Opcion invalida.\n");
+        }
+    } while (opcion != 6);
+
+    return 0;
+}
+
+
+
+-GRUPO 2-
+
+#include <stdio.h>
+#include <string.h>
+
+//-------------------STRUCTS-------------------
+
+//-----------------------FUNCIONES----------------------------
+
+//--------------------------MAIN---------------
+int main(){
+    FILE
+}

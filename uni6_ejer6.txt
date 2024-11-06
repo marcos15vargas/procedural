@@ -1,0 +1,433 @@
+Ejercicio 6
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+grupo 3
+typedef struct{
+        int cod;
+        char titulo[50];
+        char director[50];
+        int cantPers;
+} peliculas;
+//CARGA
+void carga (FILE *archi){ 
+    peliculas datos;
+    rewind(archi);
+    
+printf("ingrese el codigo (0 para finalizar: \n");
+scanf("%d", &datos.cod);
+while (datos.cod != 0){
+    printf("Ingrese el titulo de la pelicula");
+    getchar();
+    gets(datos.titulo);
+    printf("Ingrese el Director de la pelicula");
+    getchar();
+    gets(datos.director);
+    printf("Ingrese la cantidad de personas que vieron la pelicula");
+    scanf("%d", &dato.cantPers);
+    fwrite(&datos, sizeof(peliculas), 1, archi);
+    
+    printf("ingrese el codigo (0 para finalizar: \n");
+scanf("%d", &datos.cod);
+}
+//CARGA 2
+Void carga (FILE *xarchi)
+{  
+  pelicula dato;
+  Int código ;
+  Printf ("Escribe el codigo de la película (0 PARA FINALIZAR) : ")
+  fflush(stdin);
+  scanf ("%d", &codigo);
+  While (codigo !=0)
+  {
+      dato.cod = codigo;
+      Printf (" Ingreses el titulo de la pelicula ");
+      fflush (stdin);
+       gets (dato.titulo);
+       Printf (" Ingrese el director de la pelicula: ");
+       fflush(stdin);
+       gets(dato.director);
+       printf (" Ingrese la cantidad de personas que vieron la  película: ");
+       fflush (stdin);
+       Scanf ("%d", &dato.cantPers);
+       fwrite (&dato, sizeof(dato), 1, xarchi);
+       Printf ("Escribe el codigo de la película (0 PARA FINALIZAR) : ")
+  fflush(stdin);
+  scanf ("%d", &codigo);
+   }
+   
+}
+//Inciso A)
+void incisoa(FILE *archi){
+    peliculas p;
+    rewind(archi);
+    while(fread(&p,sizeof(peliculas),1,archi)){
+        printf("\nEl titulo es: %s",p.titulo);
+        printf("\nLa cantidad de personas que la vieron es de: %d",p.cantPers);
+    }
+}
+
+//GRUPO 4
+//b) Dado el codigo de una pelicula, mostrar el titulo y el director.
+void mostrarPeliculaPorCodigo(int codigo) {
+    FILE *archivo = fopen("TITULOS.DAT", "rb");
+    if (!archivo) {
+        printf("Error.\n");
+        return;
+    }
+
+    peliculas datos;
+    int encontrado = 0;
+    while (fread(&datos, sizeof(peliculas), 1, archivo) && !encontrado) {
+        if (datos.cod == codigo) {
+            printf("Titulo: %s, Director: %s\n", datos.titulo, datos.director);
+            encontrado = 1;
+        }
+    }
+
+    if (!encontrado) {
+        printf("Pelicula no encontrada con el codigo %d.\n", codigo);
+    }
+
+    fclose(archivo);
+}
+
+//c) Ingresar un titulo por teclado y mostrar el codigo y director.
+void buscarPeliculaPorTitulo(char titulo[]) {
+    FILE *archivo = fopen("TITULOS.DAT", "rb");
+    if (!archivo) {
+        printf("Error.\n");
+        return;
+    }
+
+    peliculas datos;
+    int encontrado = 0;
+    while (fread(&datos, sizeof(peliculas), 1, archivo) && !encontrado) {
+        if (strcmp(datos.titulo, titulo) == 0) {
+            printf("Codigo: %d, Director: %s\n", datos.cod, datos.director);
+            encontrado = 1;
+        }
+    }
+
+    if (!encontrado) {
+        printf("Pelicula no encontrada con el titulo %s.\n", titulo);
+    }
+
+    fclose(archivo);
+}
+
+// GRUPO 5
+//inciso d
+void generarMasVistas(FILE *archi, FILE *masVistas){
+        peliculas p;
+        rewind(archi);
+        while(fread(&p,sizeof(p),1,archi)){ 
+                if(p.cantPers > 1000){
+                      fwrite(&p,sizeof(p),1,masVistas);
+                }
+         }
+}
+
+//inciso e
+void modificarCantidadPorCodigo(FILE *archi, int cod){
+        peliculas p;
+        fseek(archi,(cod-1)*sizeof(peliculas),SEEK_SET);
+        fread(&p,sizeof(p),1,archi);
+        printf("Ingrese la nueva cantidad de personas que vieron la pelicula\n");
+        scanf("%d", &p.cantPers);
+        fseek(archi,-sizeof(peliculas),SEEK_CUR);
+        fwrite(&p,sizeof(p),1,archi);
+}
+
+//Grupo 6
+//inciso 
+void generar(FILE *archivo) {
+    FILE *nuevoArchivo = fopen("TITULOS_1000.DAT", "wb");
+    Pelicula pelicula;
+    rewind(archivo);
+
+    while (fread(&pelicula, sizeof(Pelicula), 1, archivo) == 1) {
+        if (pelicula.cant_Per > 1000) {
+            fwrite(&pelicula, sizeof(Pelicula), 1, nuevoArchivo);
+        }
+    }
+
+    fclose(nuevoArchivo);
+    printf("Archivo 'TITULOS_1000.DAT' generado.\n");
+}
+//inciso e
+
+void modificar(FILE *archivo, int codigo, int nuevaCantidad) {
+    Pelicula pelicula;
+    rewind(archivo);
+
+    while (fread(&pelicula, sizeof(Pelicula), 1, archivo) == 1) {
+        if (pelicula.cod == codigo) {
+            pelicula.cant_Per = nuevaCantidad;
+            fseek(archivo, -sizeof(Pelicula), SEEK_CUR);
+            fwrite(&pelicula, sizeof(Pelicula), 1, archivo);
+            printf("Cantidad de personas actualizada para la película con código %d.\n", codigo);
+            return;
+        }
+    }
+
+    printf("Película con código %d no encontrada.\n", codigo);
+
+GRUPO 8
+//Inciso d
+void nuevo(FILE *xa, FILE *xp){
+        peliculas pel;
+        rewind(xa);
+        while (fread(&pel, sizeof(pel), 1, xa)){
+                if (pel.cantPers > 1000){
+                        fwrite(&pel, sizeof(pel), 1 , xp);
+                }
+        }
+        return;
+}
+GRUPO 8
+//Inciso e
+void modificar(FILE *xa, int xc){
+        peliculas peli;
+        fseek(xa, xc * sizeof(peli), SEEK_SET);
+        fread(&peli, sizeof(peli), 1, xa);
+        printf("Ingresar la cantidad de personas que vieron la pelicula: ");
+        scanf("%d", &peli.cantPers);
+         fseek(xa, -sizeof(peliculas), SEEK_CUR);
+        if(fwrite(&peli, sizeof(peli), 1, xa)){
+                printf("Se modificó correctamente");
+        } else {
+                printf("No se pudo modificar");
+        }
+}
+
+//Grupo 1
+//Inciso d
+void carganuevo(FILE *xarch, FILE *narch){
+    peliculas p;
+    rewind(xarch);
+    fseek(xarch, 0, SEEK_SET);
+    fread(&p, sizeof(p), 1, xarch);
+    while(!feof(xarch)){
+        if(p.cant > 1000){
+            fwrite(&p, sizeof(p), 1, narch);
+        } 
+        fread(&p, sizeof(p), 1, xarch);
+    }
+    return;
+}
+//Inciso e
+void modificarvista( FILE *xarch, int xcod){
+    pelicula p;
+    fseek(xarch, xcod*sizeof(pelicula), SEEK_SET);
+    fread(&p, sizeof(p), 1, xarch);
+    printf("Ingrese la cantidad de vistas que se modificaran: \n");
+    scanf("%d", &xcod);
+    fseek(xarch, -sizeof(pelicula), SEEK_CUR);
+    fwrite(&p, sizeof(p), 1, xarch);
+}
+
+
+int main (){
+    FILE *Titulo,*masVistas;
+    if((Titulo = fopen("TITULOS.DAT", "w+")) == NULL){
+  printf("Ocurrio un error\n");
+ } else {qa
+     Int op,cod;
+    do{
+   printf("Menu de opciones\n0.Salir\n1.Listar por cada pelicula el titulo y cantidad de personas que vieron la pelicula\n2.Mostrar informacion de pelicula por codigo\n3.Mostrar informacion de pelicula por titulo\n4.Genere un nuevo archivo con la informacion de las peliculas que fueron vistas por mas de 1000 personas\n5.Modificar cantidad de personas que vieron una pelicula por codigo\n");
+   scanf("%d", &op);
+   
+  
+   switch(op){
+    case 1:{
+     
+     break;
+    }
+    case 2:{
+     
+     break;
+    }
+    case 3:{
+     
+     break;
+    }
+    case 4: {
+     masVistas = fopen("Peliculas Mas Vistas.DAT", "w");
+     generarMasVistas(archi,masVistas);
+     fclose(masVistas);
+     break;
+    }
+    case 5: {
+     printf("Ingrese el codigo de una pelicula\n");
+     scanf("%d",&cod);
+     modificarCantidadPorCodigo(archi,cod);
+     break;
+    }
+   }
+  } while(op != 0);
+  fclose(archi);
+  }
+}
+
+
+-GRUPO 2-
+JTP: Marcelo Mondre
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct{
+        int cod; 
+        char titulo[50];
+        char director[50];
+        int cant;
+}pelis;
+
+void carga(FILE *arch){
+        pelis c;
+    int i=0;
+    fpos_t x;
+     printf ("Ingrese un codigo de la pelicula\n");
+    scanf ("%d", &i);
+    while (i !=0){
+        fseek (arch, 0, SEEK_END);
+        fgetpos (arch, &x);
+        int cod=(int)(x/sizeof(pelis))+1;
+        c.cod=i;
+        printf("Titulo de la pelicula: ");
+        fflush(stdin);
+        gets(c.titulo);
+        printf ("Director de la pelicula: ");
+        fflush(stdin);
+        gets(c.director);
+        printf ("Cantidad de personas que la vieron: ");
+        scanf("%d", &c.cant);
+        fwrite(&c, sizeof(c), 1, arch);
+        printf ("Ingrese un nuevo codigo de la pelicula (0 para terminar)");
+        scanf ("%d", &i);
+    }
+        return;
+}
+void listar(FILE *arch){
+        pelis m;
+        rewind(arch);
+        fread(&m, sizeof(m), 1, arch);
+        printf("Titulo de la pelicula:\n"); 
+        puts(m.titulo);
+        printf("Cantidad de personas que la vieron son %d:\n", m.cant);
+        return;
+}
+
+int main (){
+        FILE *arch;
+        int op=0; 
+        if ((arch=fopen("TITULOS.DAT","w+")) == NULL){
+        printf ("Se produjo un error con el archivo");
+    }else {
+        do{
+            carga(arch);
+            fclose(arch);
+            printf("Ingrese: \n");
+            printf("1: Item a \n");  //listar
+            printf("0: Fin \n");
+            switch (scanf ("%d", &op)){
+                case 1: 
+                        listar(arch);
+                        fclose(arch);
+                    break;
+                default: printf ("EL numero ingresado no corresponde a ninguna opcion");            
+            }
+        }while(op!=0);
+    }
+        return 0;
+}
+
+
+GRUPO 7 (sergio quiroga)
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+typedef struct 
+{
+    int codigo;
+    char titulo[30];
+    char director[30];
+    int cantidad;
+}pelicula;
+
+
+void cargar(FILE*xarchi){
+pelicula c;
+printf("\ningrese el codigo, 0 para finalizar: ");
+scanf("%d",&c.codigo);
+while (c.codigo!=0)
+{
+    printf("\ningrese el titulo de la pelicula: ");
+    getchar();
+    fgets(c.titulo,sizeof(c.titulo),stdin);
+    printf("\ningrese el director de la pelicula: ");
+    getchar();
+    fgets(c.director,sizeof(c.director),stdin);
+    printf("\ningrese la cantidad de personas que vieron la pelicula: ");
+    scanf("%d",&c.cantidad);
+    fwrite(&c,sizeof(c),1,xarchi);
+    printf("\ningrese el codigo, 0 para finalizar: ");
+    scanf("%d",&c.codigo);
+}
+}
+int menu(){
+    int num;
+    printf("\eliga una opcion: ");
+    printf("\n1 - para Listar por cada pelicula el titulo y la cantidad de personas que la vieron: ");
+    printf("\n0 - para salir: ");
+    scanf("%d",&num);
+    return num;
+}
+
+void listar(FILE*xarchi){
+    pelicula c;
+    rewind(xarchi);
+    while (fread(&c,sizeof(c),1,xarchi))
+    {
+        printf("\ntitulo:%s  cantidad de personas que lo vieron:%d",c.titulo,c.cantidad);
+    }
+}
+
+int main(){
+    FILE*archi;
+    int op;
+    if ((archi=fopen("TITULOS.DAT","wb"))==NULL)
+    {
+        printf("\error");
+    }else
+    {
+        cargar(archi);
+        fclose(archi);
+    }
+    do
+    {
+        op=menu();
+        switch (op)
+        {
+        case 0:
+            break;
+        case 1:
+            {
+                if ((archi=fopen("TITULOS.DAT","rb"))==NULL)
+                {
+                    printf("\nerror en la muestra");
+                }else
+                {
+                listar(archi);
+                break;}
+            }
+        }
+    } while (op!=0);   
+    return 0;
+}
+
+
+
+

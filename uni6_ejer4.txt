@@ -1,0 +1,620 @@
+Ejercicio 4 Unidad 6
+
+ 
+-GRUPO 2-
+
+/*Una biblioteca procesa diariamente el archivo, “TITULOS.DAT”. Este archivo almacena la información para cada libro:
+Código (de 1 a 500), Título, Autor y Cantidad de ejemplares disponibles. El archivo está ordenado en forma
+secuencial por código a partir de 1.
+Se pide realizar un programa óptimo que a través del uso de funciones genere un menú de opciones que responda a
+las siguientes solicitudes:
+a) Dado el código de un libro, mostrar el título y la cantidad de ejemplares disponibles.
+b) Dado el título de un libro, mostrar el autor.
+c) Dado un Autor, mostrar todos los libros de su autoría registrados.
+d) Agregar un nuevo libro al archivo.*/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#define N 500
+
+//--------------------STRUCT--------------------
+typedef struct {
+        int cod;
+        char titulo[50];
+        char autor[50];
+        int cant;
+}libros;
+//--------------------FUNCIONES--------------------
+void carga (FILE *arch){
+    Libros c;
+    int i=0;
+    fpos_t x;
+    printf ("Ingrese un codigo de libro");
+    scanf ("%d", &i);
+    while (i !=0 && i<500){
+        fseek (arch, 0, SEEK_END);
+        fgetpos (arch, &x);
+        int cod=(int)(x/sizeof(Libros))+1;
+        c.cod=i;
+        printf("Titulo del libro: ");
+        fflush(stdin);
+        gets(c.titulo);
+        printf ("Autor del libro: ");
+        fflush(stdin);
+        gets(c.autor);
+        printf ("Cantidad de ejemplares del libro: ");
+        scanf("%d", &c.cant);
+        fwrite(&c, sizeof(c), 1, arch);
+        printf ("Ingrese un nuevo codigo de libro (0 para terminar)");
+        scanf ("%d", &i);
+    }
+}
+void mostrar_por_cod (FILE *arch, int c_b){
+    Libros m;
+    rewind(arch);
+    fseek(arch, c_b*sizeof(Libros), SEEK_SET);
+    fread(&m, sizeof(m), 1, arch);
+    printf("Titulo: "); puts(m.titulo);
+    printf("Cantidad de ejemplares: %d", m.cant);
+}
+void mostrar_por_tit  (FILE *arch, char t_b[50]){
+    Libros m;
+    rewind (arch);
+    fseek(arch, 0, SEEK_SET);
+    while (!feof(arch) && strcmp(m.titulo, t_b)){
+        fread (&m, sizeof(m), 1, arch);
+        if (!feof(arch)){
+            puts (m.autor);
+        }
+    }
+}
+void mostrar_por_autor (FILE *arch, char a_b[50]){
+    Libros m;
+    rewind (arch);
+    fseek(arch, 0, SEEK_SET);
+    while (!feof(arch)){
+        fread (&m, sizeof(m), 1, arch);
+        if (strcmp(m.autor, a_b)==0){
+            printf("El autor %s tiene registrados en su autoria los siguientes titulos: \n", a_b);
+            puts (m.autor);
+        }       
+    }
+}
+void agregar_lib (FILE *arch){
+    Libros a;
+    fpos_t x;
+    printf ("Ingrese el titulo del libro a agregar");
+    fflush(stdin);
+    gets(a.titulo);
+    fseek(arch, 0, SEEK_END);
+    fgetpos(arch, &x);
+    int cod=(int)(x/sizeof(Libros))+1;
+    a.cod=cod;
+    printf("Ingrese el autor del libro a agregar");
+    fflush(stdin);
+    gets (a.autor);
+    printf ("Ingrese la cantidad de ejemplares del libro a agregar");
+    scanf("%d", &a.cant);
+    fwrite(&a, sizeof(Libros), 1, arch);
+}
+
+//--------------------MAIN---------------------------
+int main(){
+    int op=0, cod_b=0;
+    char tit_b[50], aut_b[50];
+    FILE *archivo1;
+    if ((archivo1=fopen("TITULOS.DAT","w+")) == NULL){
+        printf ("Se produjo un error con el archivo");
+    }else {
+        do{
+            printf("Ingrese: \n");
+            printf("1: Item carga \n");
+            printf("2: Item a \n");
+            printf("3: Item b \n");
+            printf("4: Item c \n");
+            printf("5: Item d \n");
+            printf("0: Fin \n");
+            switch (scanf ("%d", &op)){
+                case 1: carga (archivo1);
+                        fclose (archivo1);
+                        break;
+                case 2: if ( (archivo1= fopen("TITULOS.DAT", "r+"))){
+                            printf ("Se produjo un error con el archivo");
+                        }else{
+                            scanf("%d", &cod_b-1);
+                            mostrar_por_cod (archivo1, cod_b);
+                        }
+                        fclose(archivo1);
+                        break;
+                case 3: if ( (archivo1= fopen("TITULOS.DAT", "r+"))){
+                            printf ("Se produjo un error con el archivo");
+                       } else{
+                            gets (tit_b);
+                            mostrar_por_tit (archivo1, tit_b);
+                        }
+                        fclose(archivo1);
+                        break;
+                case 4: if ( (archivo1= fopen("TITULOS.DAT", "r+"))){
+                            printf ("Se produjo un error con el archivo");
+                       }else{
+                            gets (aut_b);
+                            mostrar_por_autor (archivo1, aut_b);
+                        }
+                        fclose(archivo1);
+                        break;
+                case 5: if ( (archivo1= fopen("TITULOS.DAT", "r+"))){
+                            printf ("Se produjo un error con el archivo");
+                        }else{
+                            agregar_lib (archivo1);
+                        }
+                        fclose(archivo1);
+                        break;
+                default: printf ("EL numero ingresado no corresponde a ninguna opcion");            
+            }
+        }while (op != 0);
+    }
+}
+
+- Grupo 4 -
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_LIBROS 500
+#define MAX_TITULO 100
+#define MAX_AUTOR 100
+
+typedef struct {
+    int codigo;
+    char titulo[MAX_TITULO];
+    char autor[MAX_AUTOR];
+    int ejemplares;
+} Libro;
+
+// Dado el codigo de un libro, mostrar el titulo y la cantidad de ejemplares disponibles.
+void mostrarPorCodigo() {
+    FILE *archivo = fopen("TITULOS.DAT", "rb");
+    if (archivo == NULL) {
+        printf("Error al abrir el archivo.\n");
+        return;
+    }
+
+    int codigo;
+    printf("Ingrese el codigo del libro: ");
+    scanf("%d", &codigo);
+
+    Libro libro;
+    while (fread(&libro, sizeof(Libro), 1, archivo)) {
+        if (libro.codigo == codigo) {
+            printf("Titulo: %s\n", libro.titulo);
+            printf("Ejemplares disponibles: %d\n", libro.ejemplares);
+            fclose(archivo);
+            return;
+        }
+    }
+
+    printf("Libro no encontrado.\n");
+    fclose(archivo);
+}
+
+// Dado el titulo de un libro, mostrar el autor.
+void mostrarPorTitulo() {
+    FILE *archivo = fopen("TITULOS.DAT", "rb");
+    if (archivo == NULL) {
+        printf("Error al abrir el archivo.\n");
+        return;
+    }
+
+    char titulo[MAX_TITULO];
+    printf("Ingrese el titulo del libro: ");
+    getchar();
+    fgets(titulo, MAX_TITULO, stdin);
+    titulo[strcspn(titulo, "\n")] = 0;
+
+    Libro libro;
+    while (fread(&libro, sizeof(Libro), 1, archivo)) {
+        if (strcmp(libro.titulo, titulo) == 0) {
+            printf("Autor: %s\n", libro.autor);
+            fclose(archivo);
+            return;
+        }
+    }
+
+    printf("Libro no encontrado.\n");
+    fclose(archivo);
+}
+
+// Dado un autor, mostrar todos los libros de su autoria registrados.
+void mostrarPorAutor() {
+    FILE *archivo = fopen("TITULOS.DAT", "rb");
+    if (archivo == NULL) {
+        printf("Error.\n");
+        return;
+    }
+
+    char autor[MAX_AUTOR];
+    printf("Ingrese el nombre del autor: ");
+    getchar();
+    fgets(autor, MAX_AUTOR, stdin);
+    autor[strcspn(autor, "\n")] = 0;
+
+    Libro libro;
+    int encontrado = 0;
+    printf("Libros de %s:\n", autor);
+    while (fread(&libro, sizeof(Libro), 1, archivo)) {
+        if (strcmp(libro.autor, autor) == 0) {
+            printf("Codigo: %d - Titulo: %s - Ejemplares: %d\n", libro.codigo, libro.titulo, libro.ejemplares);
+            encontrado = 1;
+        }
+    }
+
+    if (!encontrado) {
+        printf("No se encontraron libros de este autor.\n");
+    }
+
+    fclose(archivo);
+}
+
+// Agregar un nuevo libro
+void agregarLibro() {
+    FILE *archivo = fopen("TITULOS.DAT", "ab");
+    if (archivo == NULL) {
+        printf("Error al abrir el archivo.\n");
+        return;
+    }
+
+    Libro nuevoLibro;
+    printf("Ingrese el codigo del libro (1-500): ");
+    scanf("%d", &nuevoLibro.codigo);
+    
+    // Validar que el codigo este en el rango correcto
+    if (nuevoLibro.codigo < 1 || nuevoLibro.codigo > 500) {
+        printf("Codigo inválido. Debe estar entre 1 y 500.\n");
+        fclose(archivo);
+        return;
+    }
+    
+    getchar();
+    printf("Ingrese el titulo del libro: ");
+    fgets(nuevoLibro.titulo, MAX_TITULO, stdin);
+    nuevoLibro.titulo[strcspn(nuevoLibro.titulo, "\n")] = 0;
+
+    printf("Ingrese el autor del libro: ");
+    fgets(nuevoLibro.autor, MAX_AUTOR, stdin);
+    nuevoLibro.autor[strcspn(nuevoLibro.autor, "\n")] = 0;
+
+    printf("Ingrese la cantidad de ejemplares disponibles: ");
+    scanf("%d", &nuevoLibro.ejemplares);
+
+    fwrite(&nuevoLibro, sizeof(Libro), 1, archivo);
+    printf("Libro agregado.\n");
+
+    fclose(archivo);
+}
+
+int main() {
+    int opcion;
+
+    do {
+        printf("\nMenu:\n");
+        printf("1. Mostrar titulo y ejemplares por codigo de libro\n");
+        printf("2. Mostrar autor por titulo de libro\n");
+        printf("3. Mostrar libros por autor\n");
+        printf("4. Agregar nuevo libro\n");
+        printf("5. Finalizar\n");
+        printf("Ingrese una opcion: ");
+        scanf("%d", &opcion);
+
+        switch (opcion) {
+            case 1:
+                mostrarPorCodigo();
+                break;
+            case 2:
+                mostrarPorTitulo();
+                break;
+            case 3:
+                mostrarPorAutor();
+                break;
+            case 4:
+                agregarLibro();
+                break;
+            case 5:
+                printf("Fin\n");
+                break;
+            default:
+                printf("Opcion invalida. Intente nuevamente.\n");
+        }
+    } while (opcion != 5);
+
+    return 0;
+}
+
+
+
+
+GRUPO 6 
+#include <stdio.h>
+#include <string.h>
+#include <malloc.h>
+#include <conio.h> 
+
+typedef struct{
+        int codigo;
+        char titulo[50];
+        char autor[50];
+        int stock;
+} libros;
+
+void agregar(FILE* arc){
+        libros c;
+        fpos_t x;
+        int cod;
+        printf("\n ingrese el codigo del libro (termine con 0): ");
+        scanf("%d",&cod);
+        fflush(stdin);
+        while(cod){
+                fseek(arc,0,SEEK_END);
+                fgetpos(arc,&x);
+                cod=(int)(x/sizeof(libros));
+                c.codigo=cod;
+                printf("\ningrese el titulo del libro: ");
+                gets(c.titulo);
+                fflush(stdin);
+                printf("\ningrese el autor del libro: ");
+                gets(c.autor);
+                fflush(stdin);
+                printf("\ningrese la cantidad de libros: ");
+                scanf("%d",&c.stock);
+                fwrite(&c,sizeof(c),1,arc);
+                printf("\ningrese el codigo del libro (termine con 0): ");
+                scanf("%d",&cod);
+                fflush(stdin);
+        }
+}
+
+void mostrarCodigo(FILE* archivo){
+        int cod;
+        libros data;
+        printf("\n Ingrese código del libro a mostrar stock ");
+        scanf("%d",&cod);
+        fseek(archivo,(cod-1)*sizeof(data), SEEK_SET);
+        fread(&data,sizeof(data),1,archivo);
+        printf("\n codigo %d titulo %s autor %s cantidad %d",data.codigo,data.titulo, data.autor, data.stock); 
+}
+
+void mostrarAutor(FILE* archivo){
+        char titulo[50];
+        libros data;
+        printf("funcion mostrar el autor \n");
+        fseek(archivo,0,SEEK_SET);
+        printf("\n titulo %s // autor %s ",data.titulo,data.autor); 
+        fflush(stdin);
+        printf("\n Ingrese el titulo del libro a mostrar autor:");
+        gets(titulo);
+        while(fread(&data,sizeof(data),1,archivo)){
+                if (strcmp(data.titulo,titulo) == 0){
+                        printf("\n titulo %s // autor %s ",data.titulo,data.autor); 
+                }
+        }
+}
+void mostrar_lib(FILE *archi,char aut[50]){
+        libros c;
+        rewind(archi);
+        //fread(&c,sizeof(c),1,archi);
+        while(fread(&c,sizeof(c),1,archi)){
+                if(strcmp(c.autor,aut) == 0){
+                        printf("\n %s \n",c.titulo);
+                }
+                //fread(&c,sizeof(c,1,archi));
+        }
+        
+}
+int main(){
+    int op=0, cod_b=0;
+    char tit_b[50], aut_b[50];
+    FILE *archivo1;
+    if ((archivo1=fopen("TITULOS.DAT","w+")) == NULL)
+        printf ("Se produjo un error con el archivo");
+    else {
+        do{
+            printf("Ingrese: \n");
+            printf("1: Item carga \n");
+            printf("2: Item a \n");
+            printf("3: Item b \n");
+            printf("4: Item c \n");
+            printf("5: Item d \n");
+            printf("0: Fin \n");
+            switch (scanf ("%d", &op)){
+                case 1: carga (archivo1);
+                        fclose (archivo1);
+                        break;
+                case 2: if ( (archivo1= fopen("TITULOS.DAT", "r+")))
+                            printf ("Se produjo un error con el archivo");
+                        else{
+                            scanf("%d", &cod_b-1);
+                            mostrar_c (archivo1, cod_b);
+                        }
+                        fclose(archivo1);
+                        break;
+                case 3: if ( (archivo1= fopen("TITULOS.DAT", "r+")))
+                            printf ("Se produjo un error con el archivo");
+                        else{
+                            gets (tit_b);
+                            mostrar_t (archivo1, tit_b);
+                        }
+                        fclose(archivo1);
+                        break;
+                case 4: if ( (archivo1= fopen("TITULOS.DAT", "r+")))
+                            printf ("Se produjo un error con el archivo");
+                        else{
+                            gets (aut_b);
+                            mostrar_a (archivo1, aut_b);
+                        }
+                        fclose(archivo1);
+                        break;
+                case 5: if ( (archivo1= fopen("TITULOS.DAT", "r+")))
+                            printf ("Se produjo un error con el archivo");
+                        else{
+                            agregar (archivo1);
+                        }
+                        fclose(archivo1);
+                        break;
+                default: printf ("EL numero ingresado no corresponde a ninguna opcion");            
+            }
+        }while (op != 0);
+    }
+}
+
+GRUPO 8
+
+#include <stdio.h>
+#include <string.h>
+
+typedef char cadena[100];
+
+struct libro{
+        int cod;
+        cadena titulo;
+        cadena autor;
+        int ejemplares;
+};
+
+void cargar(FILE *xarchi){
+        int c, xcod;
+        cadena xt;
+        libro l;
+        fpos_t x;
+        printf("\nIngrese el títlo del libro: ");
+        fflush(stdin);
+        gets(xt);
+        xcod = 1;
+        while (strcmp(xt, "FIN")){
+                l.cod = xcod;
+                strcpy(l.titulo, xt);
+                printf("\nIngrese el autor del libro: ");
+                fflush(stdin);
+                gets(l.autor);
+                printf("\nIngrese la cantidad de ejemplares: ");
+                scanf("%d", &l.ejemplares);
+                fwrite(&l, sizeof(l), 1 , xarchi);
+                xcod++;
+                printf("\nIngrese el títlo del libro: ");
+                fflush(stdin);
+                gets(xt);
+        }
+}
+
+void mostrarejempl(FILE *xa, int xc){
+        int band; 
+        libro l; 
+        rewind(xa);
+        /*while (fread(&l, sizeof(l), 1, xa)){
+                if(l.cod == xc){
+                        printf("\nTitulo: %s\nCantidad de ejemplares: %d", l.titulo, l.ejemplares);
+                        band = 1;
+                }
+        }
+        if (!band){
+                printf("El código ingresado no corresponde a un libro");
+        }*/
+        fseek(xa, (xc -1)*sizeof(libro) , SEEK_SET);
+        fread(&l, sizeof(l), 1, xa);
+        printf("\nTitulo: %s\nCantidad de ejemplares: %d", l.titulo, l.ejemplares);
+}
+
+void mostrarautor(FILE *xa, cadena xt){
+        int band; 
+        libro l; 
+        rewind(xa);
+        while (fread(&l, sizeof(l), 1, xa)){
+                if(!strcmp(l.titulo, xt)){
+                        printf("\nAutor: %s", l.autor);
+                        band = 1;
+                }
+        }
+        if (!band){
+                printf("El titulo de libro ingresado no corresponde ninguno de nuestros libros");
+        }
+}
+
+void mostrarlibros(FILE *xa, cadena xaut){
+        int band; 
+        libro l; 
+        rewind(xa);
+        while (fread(&l, sizeof(l), 1, xa)){
+                if(!strcmp(l.autor, xaut)){
+                        printf("\nTítulo: %s", l.titulo);
+                        band = 1;
+                }
+        }
+        if (!band){
+                printf("El nombre del autor ingresado no es el autor de ninguno de nuestros libros");
+        }
+}
+
+
+void agregar (FILE *xarchi) { 
+        int xcod;
+        libro l; fpos_t x;
+        printf("\nIngrese el titulo del libro: ");
+        fflush(stdin);
+        gets(l.titulo);
+        printf("\nIngrese el autor del libro: ");
+        fflush(stdin);
+        gets(l.autor);
+        printf("\nIngrese la cantidad de ejemplares: ");
+        scanf("%d", &l.ejemplares);
+        fseek(xarchi,0, SEEK_END); 
+        fgetpos(xarchi,&x);
+        xcod=(int)(x/sizeof(libro))+1;
+        l.cod = xcod;
+        fwrite(&l,sizeof(l),1,xarchi);
+}
+
+int main(void){ 
+        FILE *archi; 
+        int xcod, opcion;
+        cadena xtitulo, xautor;
+        if ((archi=fopen("TITULOS.DAT","w+"))==NULL){
+                printf("Hubo un error!");
+        } else do { 
+     printf("\n____MENU DE OPCIONES____");
+                printf("\n1. Cargar archivo");
+                printf("\n2. Mostrar titulo y cantidad de ejemplares de un libro");
+                printf("\n3. Mostrar autor de un libro");
+                printf("\n4. Mostrar libros de un autor");
+                printf("\n5. Agregar un libro");
+                 printf("\n6. Salir\n");
+                 scanf("%d", &opcion);
+                 switch(opcion) { 
+                         case 1: cargar(archi); break;
+                         case 2: {
+                                                 printf("\nIngrese código de un libro: ");
+                                                scanf("%d",&xcod);
+                                                 mostrarejempl(archi,  xcod);
+                                                break;
+                                         }
+                        case 3: {
+                                                 printf("\nIngrese titulo de un libro: ");
+                                                 fflush(stdin);
+                                                gets(xtitulo);
+                                                 mostrarautor(archi,  xtitulo);
+                                                break;
+                                         }
+                         case 4:  {
+                                                 printf("\nIngrese el nombre de un autor: ");
+                                                 fflush(stdin);
+                                                gets(xautor);
+                                                 mostrarlibros(archi,  xautor);
+                                                break;
+                                         }
+                         case 5: agregar(archi); break;
+                         case 6: break;
+                         default: printf ("EL numero ingresado no corresponde a ninguna opcion");         
+                        }                        
+                
+                } while (opcion !=6);
+                fclose(archi);
+}

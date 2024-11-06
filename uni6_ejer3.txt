@@ -1,0 +1,562 @@
+GRUPO 3
+/*Ejercicio 3
+Se registra la información de las operaciones realizadas por un cajero durante un fin de semana. De cada operación
+se conoce: numero de operación, importe y tipo de operación (1: cobro; 2: pago).
+Utilizando funciones óptimas realice lo siguiente:
+a) Genere una lista con la información de las operaciones.
+b) Indique cual es el/los numero/s de mayor importe cobrado. (usar una función recursiva)
+c) Con la información de la lista genere un archivo con los datos de los pagos realizados.
+d) Eliminar la lista generada.
+e) Indicar en el principal el importe promedio de los pagos realizados.
+f) Eliminar del archivo los pagos menores a $500.*/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct{
+        int num;
+        float imp;
+        int cod;
+} cajero;
+
+struct nodo{
+        cajero dato;
+        struct nodo *sig;
+};
+
+typedef struct nodo *puntero;
+
+
+void crear(puntero *xcbz){
+    *xcbz = NULL;
+    }
+
+void menu(){
+    printf("\n---------MENU----------\n");
+         printf("\nIngrese 1 para cargar\n");
+         printf("\nIngrese 2 para buscar mayor\n");
+         printf("\nIngrese 3 para eliminar lista\n");
+         printf("\nIngrese 4 para crear archivo\n");
+         printf("\nIngrese 5 para promedio\n");
+         printf("\nIngrese 6 para eliminar\n");
+         printf("\nIngrese 7 para salir\n");
+         printf("\n-------------------------\n");
+ }
+
+
+void carga (cajero *xcbz){
+        int num; 
+        cajero nuevo, p, ant;
+  printf("Ingrese el valor del nuevo nodo: ");
+  scanf("%d", &num);
+  while (num!=0){
+      nuevo = (cajero) malloc (sizeof(struct nodo)); 
+          nuevo->nro=num;
+          nuevo->sig=NULL;
+          if (*xcbz==NULL || num < (*xcbz)->nro){  //cabeza 0 o el numero es menor a lo que tiene cabeza en numero
+                  nuevo->sig= *xcbz;
+                  *xcbz=nuevo;
+          }else{
+                  p=*xcbz;
+                  ant=NULL;
+                  while (p!=NULL && num> p->nro){
+                          ant=p;
+                          p=p->sig;
+                  }
+                  ant->sig=nuevo;
+                  nuevo->sig=p;
+          }
+  printf("Ingrese el valor del nuevo nodo: ");
+  scanf("%d", &num);
+}
+}
+
+//b) Indique cual es el/los numero/s de mayor importe cobrado. (usar una función recursiva)
+
+void mayor (puntero xcbz, int max) {
+    if (xcbz!=NULL){
+        if ((xcbz->cajero.cod==1)&&(xcbz->cajero.imp > max)){
+            max= xcbz->cajero.imp;
+                   return mayor(xcbz->sig, max);
+    }
+    else
+        return max;
+}
+
+//c) Con la información de la lista genere un archivo con los datos de los pagos realizados.
+
+void crearArchivo(cajero xcbz, FILE *archivo){
+    if (xcbz != NULL){
+        if (xcbz->dato.cod == 2){
+            fwrite(&xcbz, sizeof(nodo), 1, archivo);
+            crearArchivo(xcbz->sig, archivo);
+        }
+    }
+}
+
+void eliminarLista (cajero *xcbz){
+        if (*xcbz!=NULL){
+            cajero borrar=*xcbz;
+            *xcbz=(*xcbz)->sig;
+                 free (borrar);
+                eliminar (xcbz);
+        }
+}
+        
+//e) Indicar en el principal el importe promedio de los pagos realizados.
+ float promedio(FILE *archivo){
+        float total = 0, cont = 0;
+        dato d;
+        rewind(archivo);
+        while(fread(&d,sizeof(d),1,archivo)){
+                total += d.imp;
+                cont++;
+        }
+        return total / cont;
+}
+    
+
+int main (){
+    FILE *archivo;
+    puntero *cbz;
+    int op, i;
+float prom, max;
+    crear(&cbz);
+ prom = promedio(archivo);              
+    do{
+                Menu();
+                printf("Ingrese la opcion: ");
+                scanf("%d",&op);
+                switch(op){
+                        case 1:
+                                carga(&cbz);
+                                break;
+                        case 2:
+                                mayor(cbz, max);
+                                break;        
+                        case 3:
+                                eliminarLista(&cbz);
+                                break;
+                        case 4:
+                            crearArchivo(&cbz, archivo);
+                            break;
+  case 5: prom;
+   break;
+  case 6:  eliminarArchivo(archivo);
+break;
+                        case 7:
+                                printf("Salida");
+                                break;
+                        default: 
+                                printf("Opcion invalida");
+                                break;
+                }
+        }while(op != 7); 
+}
+}
+
+
+
+______________________
+grupo 7
+
+/*
+Ejercicio 3
+Se registra la informacion de las operaciones realizadas por un cajero durante un fin de semana. De cada operacion
+se conoce: numero de operacion, importe y tipo de operacion (1: cobro; 2: pago).
+Utilizando funciones optimas realice lo siguiente:
+a) Genere una lista con la informacion de las operaciones.
+b) Indique cual es el/los numero/s de mayor importe cobrado. (usar una funcion recursiva)
+c) Con la informacion de la lista genere un archivo con los datos de los pagos realizados.
+d) Eliminar la lista generada.
+e) Indicar en el principal el importe promedio de los pagos realizados.
+f) Eliminar del archivo los pagos menores a $500.
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct operacion
+{
+    int num, tipo;
+    float imp;
+} operacion;
+
+typedef struct nodo
+{
+    operacion dato;
+    nodo *sig;
+} nodo;
+
+typedef nodo *puntero;
+
+int validarTipo()
+{
+    int tipo;
+    puts("Ingrese tipo de operacion (1: cobro; 2: pago)");
+    scanf("%d", &tipo);
+    if (tipo == 1 || tipo == 2)
+        return tipo;
+    else
+    {
+        puts("Tipo incorrecto");
+        return validarTipo();
+    }
+}
+
+void cargaOperaciones(puntero &cabeza)
+{
+    int numOp;
+    puntero nuevo;
+    puts("Ingrese numero de operacion (termina con '0')");
+    scanf("%d", &numOp);
+    while (numOp)
+    {
+        nuevo = (nodo *)malloc(sizeof(nodo))
+        nuevo->dato.num = numOp;
+        puts("Ingrese importe");
+        scanf("%f", &nuevo->dato.imp);
+        nuevo->dato.tipo = validarTipo()
+        nuevo->sig = cabeza;
+        cabeza = NULL;
+        puts("Ingrese numero de operacion (termina con '0')");
+        scanf("%d", &numOp);
+    }
+}
+
+float buscarMayor(puntero cabeza, float mayor)
+{
+    if (cabeza != NULL)
+    {
+        if (cabeza->dato.imp > mayor)
+            mayor = cabeza->dato.imp;
+        return buscarMayor(cabeza->sig, mayor);
+    }
+    else
+        return mayor;
+}
+
+void mostrarMayor(puntero cabeza, float mayor)
+{
+    if (cabeza != NULL)
+    {
+        if (cabeza->dato.imp == mayor)
+            printf("Operacion numero %d\n", cabeza->dato.num);
+        buscarMayor(cabeza->sig, mayor);
+    }
+}
+
+void guardarLista(puntero cabeza, FILE *arch)
+{
+    if (cabeza != NULL)
+    {
+        if (cabeza->dato.tipo == 2)
+        {
+            fwrite(&cabeza, sizeof(nodo), 1, arch);
+            guardarLista(cabeza->sig, arch);
+        }
+    }
+}
+
+void liberar(puntero &cabeza)
+{
+    if (cabeza != NULL)
+    {
+        liberar(cabeza->sig);
+        free(cabeza);
+    }
+}
+
+float promedio(FILE *arch)
+{
+    float acum = 0;
+    int cant = 0;
+    operacion aux;
+
+    while (fread(&aux, sizeof(aux), 1, arch))
+    {
+        acum += aux.imp;
+        cant++;
+    }
+
+    return (acum / cant);
+}
+
+void copiarMenoresA500(FILE *arch, FILE *archAux)
+{
+    operacion auxiliar;
+    while (fread(&auxiliar, sizeof(auxiliar), 1, arch))
+    {
+        if (auxiliar.imp > 500)
+            fwrite(&auxiliar, sizeof(auxiliar), 1, archAux);
+    }
+}
+
+int main()
+{
+    puntero cabeza = NULL;
+    float mayor;
+    FILE *archivo, *archivoAux;
+
+    cargaOperaciones(cabeza);
+
+    puts("\n\nNumeros de operaciones con importe igual al al mayor");
+    mayor = buscarMayor(cabeza, 0);
+    mostrarMayor(cabeza, mayor);
+
+    archivo = fopen("operaciones.dat", "wb");
+    if (archivo == NULL)
+        puts("Error al intentar abrir el archivo 'operaciones.dat'");
+    else
+    {
+        guardarLista(cabeza, archivo);
+        fclose(archivo);
+    }
+
+    liberar(cabeza);
+
+    archivo = fopen("operaciones.dat", "rb");
+    if (archivo == NULL)
+        puts("Error al intentar abrir el archivo 'operaciones.dat'");
+    else
+    +
+    {
+        printf("EL importe promedio de los pagos realizados es de $%.2f\n", promedio(archivo));
+        archivoAux = fopen("operacionesAuxiliar.dat", "wb");
+        if (archivoAux == NULL)
+            puts("Error al intentar abrir el archivo 'operacionesAuxiliar.dat'");
+        else
+        {
+            copiarMenoresA500(archivo, archivoAux);
+            fclose(archivoAux);
+        }
+        fclose(archivo);
+    }
+
+    remove("operaciones.dat");
+    rename("opearcionesAuxiliar.dat", "operaciones.dat");
+
+    return 0;
+}
+
+Grupo 5
+
+
+#include<stdio.h>
+#include<stdlib.h>
+
+struct dato{
+        int num, tipo;
+        float imp;
+};
+
+struct nodo{
+        struct dato datos;
+        struct nodo *sig;
+};
+
+typedef struct nodo *puntero;
+
+void carga(puntero &xp){
+        int num;
+        puntero nuevo;
+        printf("Ingrese el numero de la operacion (-1 para salir)\n");
+        scanf("%d", &num);
+        while(num != -1){
+                nuevo = (puntero) malloc(sizeof(struct nodo));
+                printf("Ingrese el importe\n");
+                scanf("%f", &nuevo->datos.imp);
+                printf("Ingrese el tipo de operacion (1: cobro; 2: pago)\n");
+                scanf("%d", &nuevo->datos.tipo);
+                nuevo->datos.num = num;
+                nuevo->sig = xp;
+                xp = nuevo;
+                printf("Ingrese el numero de la operacion (-1 para salir)\n");
+                scanf("%d", &num);
+        }
+}
+
+void indicarMayor(puntero xp, float &mayor){
+        if(xp != NULL){
+                if(xp->datos.imp > mayor && xp->datos.tipo == 1){
+                        mayor = xp->datos.imp;
+                }
+                indicarMayor(xp->sig,mayor);
+                if(xp->datos.imp == mayor && xp->datos.tipo == 1){
+                        printf("La operacion con numero %d se encuentra entre los de mayor importe cobrado\n",xp->datos.num);
+                }        
+        }
+}
+
+void generarArchivo(puntero xp, FILE *archi){
+    while(xp != NULL){
+        if(xp->datos.tipo == 2){
+                fwrite(&xp->datos, sizeof(xp->datos), 1, archi);
+        }
+        xp = xp->sig;
+    }
+}
+
+void mostrar(FILE *archi){
+    dato d;
+    rewind(archi); 
+    while(fread(&d, sizeof(d), 1, archi) == 1){
+            printf("Datos: num: %d - imp: %.2f - tipo: %d\n", d.num, d.imp, d.tipo);
+        }
+}
+
+float calcularPromedio(FILE *archi){
+        float total = 0, cont = 0;
+        dato d;
+        rewind(archi);
+        while(fread(&d,sizeof(d),1,archi)){
+                total += d.imp;
+                cont++;
+        }
+        return total / cont;
+}
+
+void eliminarLista(puntero &xp){
+        puntero p;
+        while(xp !=NULL){
+                p = xp;
+                xp = xp->sig;
+                free(p);
+        }
+}
+
+void generarNuevo(FILE *archi, FILE *auxi){
+        dato d;
+        rewind(archi);
+        while(fread(&d,sizeof(d),1,archi)){ 
+                if(d.imp > 500){
+                        fwrite(&d,sizeof(d),1,auxi);
+                }
+         }
+}
+
+int main(){
+        puntero xp = NULL;
+        float mayor = 0, promedio; 
+        carga(xp);
+        indicarMayor(xp,mayor);
+        FILE *archi, *auxi;
+        if ((archi = fopen("Operaciones.dat", "w+")) == NULL){
+                printf("Hubo un error\n");
+        } else {
+                generarArchivo(xp,archi);
+                eliminarLista(xp);
+                //mostrar(archi);
+                printf("El promedio de los pagos realizados es de $%.2f\n", calcularPromedio(archi));
+                 auxi=fopen("auxiliar.dat","w");
+                 generarNuevo(archi,auxi);
+                fclose(archi);
+                fclose(auxi);
+                remove("Operaciones.dat");
+                rename("auxiliar.dat","Operaciones.dat");
+      //  }
+}
+
+//GRUPO 1
+#include <stdio.h>
+#include <stdlib.h>
+typedef struct {
+        int numero;
+        float imp;
+        int tipo;
+        }operaciones;
+
+struct nodo{
+        operaciones dato;
+        struct nodo*sig;
+};
+typedef struct nodo*puntero;
+
+void inicializa (puntero &c){
+        c=NULL;
+}
+
+void carga (puntero &c){
+        puntero nuevo;
+        int numo;
+        printf("ingrese el numero de operacion (termine con 0): \n");
+        scanf("%d", &numo);
+        while(numo!=0){
+                nuevo=(puntero)malloc(sizeof(struct nodo));
+                nuevo->dato.numero=numo;
+                printf("ingrese el numero de importe: \n");
+                scanf("%f", &nuevo->dato.imp);
+                printf("ingrese el tipo de operacion (1: cobro; 2: pago): \n");
+                scanf("%d", &nuevo->dato.tipo);
+                nuevo->sig=c;
+                c=nuevo;
+                printf("ingrese el numero de operacion (termine con 0): \n");
+                scanf("%d", &numo);
+        }
+}
+void mayorimp (puntero c, float &m){
+        if(c != NULL){
+                if(m<c->dato.imp){
+                        m=c->dato.imp;
+                        mayorimp (c->sig, m);
+                        
+                }else{
+                        mayorimp (c->sig, m);
+                }
+        if(m==c->dato.imp){
+            printf("%d \n", c->dato.numero);
+        }
+        }        
+}
+
+void cargar(puntero c, FILE * xarchi){
+        while(c != NULL){
+                fwrite(&c->dato, sizeof(operaciones), 1, xarchi);
+                c=c->sig;
+        }
+}
+
+float promedio(FILE * xarchi){
+        int cont=0;
+        operaciones b;
+        float acum=0, prom;
+        rewind(xarchi);
+        fread(&b,sizeof(b), 1, xarchi);
+        while(!feof(xarchi)){
+                acum+=b.imp;
+                cont++;
+        }
+        prom= acum/cont;
+        return prom;
+}
+
+void eliminar(FILE * xarchi){
+        operaciones b;
+        int f=0;
+        fseek(xarchi,0,SEEK_SET);
+        while()
+}
+
+int main(){
+        float may=-1;
+        int p;
+        puntero cab;
+        FILE *archi;
+        inicializa(cab);
+        carga(cab);
+        printf("los numeros de operacion con el mayor importe son: \n");
+        mayorimp(cab, may);
+        
+        if(archi=fopen("PAGOS.REALIZADO", "a+")== NULL){
+                printf("Hay error\n");
+        } else {
+                cargar(cab, archi);
+                free(cab);
+                p=promedio(archi);
+                printf("El promedio de los pagos realizados es de: %2.f\n", p);
+                eliminar(archi);
+        }
+}
+
+
